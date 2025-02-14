@@ -2,13 +2,12 @@ package com.rte_france.argus.embedded_powsybl;
 
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.Network;
+import com.powsybl.loadflow.LoadFlow;
 import com.powsybl.nad.NetworkAreaDiagram;
-import com.powsybl.nad.svg.SvgParameters;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.io.IOException;
@@ -34,20 +33,23 @@ public final class IIdmManager {
     public static CCharPointer readAndGenerateSvg(IsolateThread thread, CCharPointer filePath) {
         var path = CTypeConversion.toJavaString(filePath);
 
-        // Get the file name without extension for SVG output
-        var fileName = Path.of(path).getFileName().toString();
-        var svgFileName = fileName.substring(0, fileName.lastIndexOf('.')) + ".svg";
+        try {
+            // Get the file name without extension for SVG output
+            var fileName = Path.of(path).getFileName().toString();
+            var svgFileName = fileName.substring(0, fileName.lastIndexOf('.')) + ".svg";
 
-        // Read the network using PowSyBl
-        var network = Network.read(path);
+            // Read the network using PowSyBl
+            var network = Network.read(path);
+            LoadFlow.run(network);
+            NetworkAreaDiagram.draw(network, Path.of(svgFileName));
 
-        // Generate the network diagram
-        var diagram = NetworkAreaDiagram.drawToString(network, new SvgParameters());
+            return CTypeConversion.toCString("Successfully generated " + svgFileName).get();
 
-        System.out.println(diagram);
-
-        return CTypeConversion.toCString(diagram).get();
-
+        } catch (PowsyblException e) {
+            return CTypeConversion.toCString("Error processing network: " + e.getMessage()).get();
+        } catch (Exception e) {
+            return CTypeConversion.toCString("Unexpected error: " + e.getMessage()).get();
+        }
     }
 
 

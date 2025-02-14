@@ -4,5 +4,14 @@
     "methods": [
       { "name": "readXiidmFile", "parameterTypes": ["org.graalvm.nativeimage.IsolateThread", "org.graalvm.nativeimage.c.type.CCharPointer"] }
     ]
+  },
+  {
+    "name": "com.powsybl.commons.config.BaseVoltagesConfig",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true,
+    "allPublicFields": true
   }
 ]
