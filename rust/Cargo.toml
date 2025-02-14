@@ -4,9 +4,13 @@ version = "0.1.0"
 edition = "2021"
 links = "embedded-powsybl"
 
-[lib]
-crate-type = ["staticlib", "rlib"]
+# [lib]
+# crate-type = ["staticlib", "rlib"]
 
 [dependencies]
 jni = "0.21.1"
 libloading = "0.8.6"
+
+[build-dependencies]
+walkdir = "2.5.0"
+bindgen = "0.71.1"

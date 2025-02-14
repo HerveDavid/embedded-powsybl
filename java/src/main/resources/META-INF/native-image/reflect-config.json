@@ -1,0 +1,8 @@
+[
+  {
+    "name": "com.rte_france.argus.embedded_powsybl.IIdmManager",
+    "methods": [
+      { "name": "readXiidmFile", "parameterTypes": ["org.graalvm.nativeimage.IsolateThread", "org.graalvm.nativeimage.c.type.CCharPointer"] }
+    ]
+  }
+]

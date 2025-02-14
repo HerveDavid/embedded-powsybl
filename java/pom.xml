@@ -9,9 +9,9 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>23</maven.compiler.source>
+        <maven.compiler.target>23</maven.compiler.target>
         <graalvm.version>23.0.2</graalvm.version>
         <native.maven.plugin.version>0.10.3</native.maven.plugin.version>
     </properties>
@@ -24,10 +24,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.11.3</version>
-            <scope>test</scope>
+            <groupId>org.graalvm.truffle</groupId>
+            <artifactId>truffle-api</artifactId>
+            <version>${graalvm.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -68,37 +68,6 @@
 
     <profiles>
         <profile>
-            <id>native</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.graalvm.buildtools</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <version>${native.maven.plugin.version}</version>
-                        <extensions>true</extensions>
-                        <executions>
-                            <execution>
-                                <id>build-native</id>
-                                <goals>
-                                    <goal>compile-no-fork</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                            <execution>
-                                <id>test-native</id>
-                                <goals>
-                                    <goal>test</goal>
-                                </goals>
-                                <phase>test</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <!-- Profil pour Linux -->
-        <profile>
             <id>native-linux</id>
             <build>
                 <plugins>
@@ -111,9 +80,7 @@
                             <sharedLibrary>true</sharedLibrary>
                             <buildArgs>
                                 <buildArg>--no-fallback</buildArg>
-                                <buildArg>--initialize-at-build-time</buildArg>
                                 <buildArg>-H:+SharedLibrary</buildArg>
-                                <buildArg>--target=linux-amd64</buildArg>
                             </buildArgs>
                         </configuration>
                         <executions>
@@ -123,74 +90,6 @@
                                     <goal>compile-no-fork</goal>
                                 </goals>
                                 <phase>package</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <!-- Profil pour Windows -->
-        <profile>
-            <id>native-windows</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.graalvm.buildtools</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <version>${native.maven.plugin.version}</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <sharedLibrary>true</sharedLibrary>
-                            <buildArgs>
-                                <buildArg>--no-fallback</buildArg>
-                                <buildArg>--initialize-at-build-time</buildArg>
-                                <buildArg>-H:+SharedLibrary</buildArg>
-                                <buildArg>--target=windows-amd64</buildArg>
-                            </buildArgs>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>build-native</id>
-                                <goals>
-                                    <goal>compile-no-fork</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <!-- Profil pour compiler pour toutes les plateformes -->
-        <profile>
-            <id>native-all</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <executions>
-                            <execution>
-                                <id>compile-all-platforms</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <exec executable="mvn" failonerror="true">
-                                            <arg value="package"/>
-                                            <arg value="-Pnative-linux"/>
-                                        </exec>
-                                        <exec executable="mvn" failonerror="true">
-                                            <arg value="package"/>
-                                            <arg value="-Pnative-windows"/>
-                                        </exec>
-                                    </target>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
