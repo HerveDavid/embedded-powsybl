@@ -29,6 +29,12 @@
             <version>${graalvm.version}</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-starter</artifactId>
+            <version>2024.4.1</version>
+        </dependency>
     </dependencies>
 
     <build>

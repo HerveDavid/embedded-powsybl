@@ -12,9 +12,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let powsybl = EmbeddedPowsybl::init()?;
     let filepath = std::fs::canonicalize(&args[1])?;
-    let content = powsybl.read_xiidm_file(&filepath.to_str().unwrap());
+    let content = powsybl.read_network_file(&filepath.to_str().unwrap());
 
-    println!("{}", content.unwrap());
+    match content {
+        Ok(ok) => println!("{ok}"),
+        Err(ko) => println!("{ko}"),
+    };
 
     Ok(())
 }

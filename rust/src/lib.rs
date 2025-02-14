@@ -4,7 +4,6 @@ use std::ffi::CString;
 use std::fs;
 use std::path::PathBuf;
 
-// Importation des bindings générés
 mod bindings;
 use bindings::*;
 
@@ -32,16 +31,12 @@ impl EmbeddedPowsybl {
     }
 
     fn get_library_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
-        // Embarquer la bibliothèque directement dans l'exécutable
         static LIB_BYTES: &[u8] = include_bytes!("../../java/target/embedded-powsybl.so");
 
-        // Créer un répertoire temporaire pour extraire la bibliothèque
         let temp_dir = std::env::temp_dir().join("embedded-powsybl");
         fs::create_dir_all(&temp_dir)?;
 
         let lib_path = temp_dir.join("embedded-powsybl.so");
-
-        // Écrire la bibliothèque seulement si elle n'existe pas déjà
         if !lib_path.exists() {
             fs::write(&lib_path, LIB_BYTES)?;
         }
@@ -61,7 +56,7 @@ impl EmbeddedPowsybl {
 
         let params = graal_create_isolate_params_t {
             version: 1,
-            ..Default::default() // Utilisation du trait Default généré par bindgen
+            ..Default::default()
         };
 
         let mut isolate: *mut graal_isolate_t = std::ptr::null_mut();
@@ -111,7 +106,6 @@ impl EmbeddedPowsybl {
                 return Err("Failed to read XIIDM file".into());
             }
 
-            // Convertir le résultat en String
             let content = CStr::from_ptr(result).to_string_lossy().into_owned();
 
             if content.starts_with("Error:") {
@@ -119,6 +113,30 @@ impl EmbeddedPowsybl {
             }
 
             Ok(content)
+        }
+    }
+
+    pub fn read_network_file(&self, file_path: &str) -> Result<String, Box<dyn std::error::Error>> {
+        unsafe {
+            let read_and_generate = self
+                .lib
+                .get::<unsafe extern "C" fn(*mut graal_isolatethread_t, *const i8) -> *const i8>(
+                    b"readNetworkFile",
+                )?;
+
+            let c_file_path = CString::new(file_path)?;
+            let result = read_and_generate(self.thread, c_file_path.as_ptr());
+
+            if result.is_null() {
+                return Err("Failed to generate SVG".into());
+            }
+
+            let message = CStr::from_ptr(result).to_string_lossy().into_owned();
+            if message.starts_with("Error") {
+                return Err(message.into());
+            }
+
+            Ok(message)
         }
     }
 }
